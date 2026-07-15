@@ -1,0 +1,38 @@
+openapi: 3.1.0
+info:
+  title: Clean Widgets API
+  version: 1.0.0
+  description: A profile-compliant OpenAPI fixture; the OpenAPI ruleset should be silent on it.
+servers:
+  - url: https://api.example.gov/v1
+security:
+  - oauth2Auth:
+      - widgets:read
+paths:
+  /widgets:
+    get:
+      operationId: listWidgets
+      description: List widgets.
+      security:
+        - oauth2Auth:
+            - widgets:read
+      responses:
+        "200":
+          description: A list of widgets.
+components:
+  securitySchemes:
+    oauth2Auth:
+      type: oauth2
+      description: OAuth 2.1 with authorization code (interactive) and client credentials (M2M).
+      flows:
+        authorizationCode:
+          authorizationUrl: https://as.example.gov/authorize
+          tokenUrl: https://as.example.gov/token
+          refreshUrl: https://as.example.gov/token
+          scopes:
+            widgets:read: Read widgets
+            widgets:write: Write widgets
+        clientCredentials:
+          tokenUrl: https://as.example.gov/token
+          scopes:
+            widgets:read: Read widgets

@@ -1,0 +1,203 @@
+# @api-common/spectral-api-authorization-ruleset — OpenAPI target
+#
+# A curated, OWNED, GROUNDED Spectral ruleset that lints an OpenAPI document
+# against the API Authorization Profile (https://apicommons.org/api-authorization).
+# Two tiers: `normal` (grounded in RFC 9700 / OAuth 2.1) and `high` (FAPI 2.0).
+#
+# This file is the OpenAPI-facing HALF of the profile. It checks what an OpenAPI
+# document can honestly carry: the security scheme contract, per-operation and
+# global `security`, declared scopes, transport, and the SHAPE of declared OAuth
+# flows (which lets us ban `implicit` and `password`). The FAPI-specific truth —
+# DPoP, PAR, client-authentication methods, PKCE S256, response types, signing
+# algorithms — lives in an authorization server's RFC 8414 metadata and is
+# checked by the companion `api-authorization-oauth-metadata.yaml`. Run both.
+#
+# Every rule below uses Spectral's BUILT-IN functions only (defined / undefined /
+# pattern / schema) so it runs anywhere Spectral runs, with no custom JS. Each
+# rule carries a stable id, a description of the risk, a message, a severity, a
+# documentationUrl, and a tier tag (`normal` | `high`).
+#
+# THE FLOOR: static linting checks the DECLARED contract, not the running
+# system. It cannot verify a live DPoP proof, real token binding, or that
+# object-/function-level authorization is correct (that is OWASP API1/API5 — see
+# @api-common/spectral-owasp-ruleset). A clean report means the contract is not
+# leaving an obvious door open; the rest is owed to code, tests, and the gateway.
+#
+# Provenance: RFC 9700 (OAuth 2.0 Security BCP), OAuth 2.1
+# (draft-ietf-oauth-v2-1), FAPI 2.0 Security Profile. Generalized from the German
+# federal API authorization Sicherheitsvorgaben.
+#
+# License: Apache-2.0 — Copyright 2026 API Commons (Kin Lane).
+
+extends: []
+
+rules:
+
+  # =========================================================================
+  # Transport — TLS-1 (normal)
+  # =========================================================================
+  authz-transport-https-servers:
+    description: >-
+      TLS-1 (normal). All API servers must be served over HTTPS. Tokens and
+      credentials sent over plaintext HTTP are trivially interceptable.
+    message: "API Authorization (TLS-1, normal): server URL `{{value}}` must use https://."
+    severity: error
+    documentationUrl: https://apicommons.org/api-authorization#tls-1
+    formats: [oas3]
+    given: $.servers[*].url
+    then:
+      function: pattern
+      functionOptions:
+        match: "^https://"
+
+  # =========================================================================
+  # Security scheme contract — SEC-2 (normal)
+  # =========================================================================
+  authz-security-schemes-defined:
+    description: >-
+      SEC-2 (normal). The document must define at least one security scheme
+      under `components.securitySchemes`. Without a declared scheme there is no
+      authorization contract to review or enforce.
+    message: "API Authorization (SEC-2, normal): `components.securitySchemes` must define at least one scheme."
+    severity: error
+    documentationUrl: https://apicommons.org/api-authorization#sec-2
+    formats: [oas3]
+    given: $
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          required: [components]
+          properties:
+            components:
+              type: object
+              required: [securitySchemes]
+              properties:
+                securitySchemes:
+                  type: object
+                  minProperties: 1
+
+  # =========================================================================
+  # Global security baseline — SEC-1 (normal)
+  # A global `security` array is the defense-in-depth baseline; per-operation
+  # security may still narrow it. Warn (not error) so per-operation-only APIs
+  # are nudged, not failed.
+  # =========================================================================
+  authz-global-security-defined:
+    description: >-
+      SEC-1 (normal). Declare a top-level `security` requirement as the default
+      for every operation. A global baseline ensures no operation is
+      unintentionally left open.
+    message: "API Authorization (SEC-1, normal): declare a global `security` requirement as the default baseline."
+    severity: warn
+    documentationUrl: https://apicommons.org/api-authorization#sec-1
+    formats: [oas3]
+    given: $
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          required: [security]
+          properties:
+            security:
+              type: array
+              minItems: 1
+
+  # =========================================================================
+  # Grant types — GRANT-1 / GRANT-2 / GRANT-3
+  # =========================================================================
+  authz-grant-no-implicit:
+    description: >-
+      GRANT-1 (normal). The OAuth `implicit` grant must not be offered. It
+      returns tokens in the browser front channel where they leak through
+      history, logs, and referrers; OAuth 2.1 removes it.
+    message: "API Authorization (GRANT-1, normal): the `implicit` flow must not be offered (removed in OAuth 2.1)."
+    severity: error
+    documentationUrl: https://apicommons.org/api-authorization#grant-1
+    formats: [oas3]
+    given: $.components.securitySchemes[*].flows.implicit
+    then:
+      function: undefined
+
+  authz-grant-no-password:
+    description: >-
+      GRANT-2 (normal). The resource-owner password credentials grant must not
+      be offered. It trains users to hand their password to clients and cannot
+      support modern authentication; OAuth 2.1 removes it.
+    message: "API Authorization (GRANT-2, normal): the `password` flow must not be offered (removed in OAuth 2.1)."
+    severity: error
+    documentationUrl: https://apicommons.org/api-authorization#grant-2
+    formats: [oas3]
+    given: $.components.securitySchemes[*].flows.password
+    then:
+      function: undefined
+
+  authz-grant-types-allowed:
+    description: >-
+      GRANT-3 (normal). OAuth2 schemes may only declare the `authorizationCode`
+      (interactive) and `clientCredentials` (machine-to-machine) flows. Any
+      other flow is disallowed by the profile.
+    message: "API Authorization (GRANT-3, normal): OAuth2 flows must be limited to `authorizationCode` and/or `clientCredentials`."
+    severity: error
+    documentationUrl: https://apicommons.org/api-authorization#grant-3
+    formats: [oas3]
+    given: $.components.securitySchemes[?(@.type=='oauth2')].flows
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          propertyNames:
+            enum: [authorizationCode, clientCredentials]
+
+  # =========================================================================
+  # OAuth endpoint transport — TLS-1 (normal), OAuth-flow URLs
+  # =========================================================================
+  authz-oauth2-https-urls:
+    description: >-
+      TLS-1 (normal). OAuth authorization, token, and refresh URLs declared on a
+      flow must use HTTPS. Plaintext authorization endpoints expose codes and
+      tokens to interception.
+    message: "API Authorization (TLS-1, normal): OAuth flow `authorizationUrl`/`tokenUrl`/`refreshUrl` must use https://."
+    severity: error
+    documentationUrl: https://apicommons.org/api-authorization#tls-1
+    formats: [oas3]
+    given: $.components.securitySchemes[*].flows[*]
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          properties:
+            authorizationUrl:
+              type: string
+              pattern: "^https://"
+            tokenUrl:
+              type: string
+              pattern: "^https://"
+            refreshUrl:
+              type: string
+              pattern: "^https://"
+
+  # =========================================================================
+  # Scopes / least privilege — SCOPE-1 (normal)
+  # =========================================================================
+  authz-oauth2-scopes-defined:
+    description: >-
+      SCOPE-1 (normal). Each OAuth2 flow should declare named scopes so
+      operations can request least-privilege access. An empty `scopes` map means
+      access cannot be constrained by scope.
+    message: "API Authorization (SCOPE-1, normal): OAuth2 flow must declare at least one named scope."
+    severity: warn
+    documentationUrl: https://apicommons.org/api-authorization#scope-1
+    formats: [oas3]
+    given: $.components.securitySchemes[?(@.type=='oauth2')].flows[*]
+    then:
+      field: scopes
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          minProperties: 1

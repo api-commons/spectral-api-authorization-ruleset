@@ -1,0 +1,64 @@
+{
+  "name": "@api-common/spectral-api-authorization-ruleset",
+  "version": "0.1.0",
+  "description": "A curated, owned, grounded Spectral ruleset for the API Authorization Profile — lint your OpenAPI and OAuth Authorization Server metadata against OAuth 2.1 / FAPI 2.0 at two tiers (normal/high). An API Commons tool.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "author": "API Evangelist (https://apievangelist.com)",
+  "homepage": "https://apicommons.org/api-authorization",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/api-commons/spectral-api-authorization-ruleset.git"
+  },
+  "bugs": {
+    "url": "https://github.com/api-commons/spectral-api-authorization-ruleset/issues"
+  },
+  "keywords": [
+    "spectral",
+    "oauth",
+    "fapi",
+    "api-authorization",
+    "api-security",
+    "dpop",
+    "ruleset",
+    "governance",
+    "openapi",
+    "oauth-metadata",
+    "linting",
+    "api-commons"
+  ],
+  "main": "api-authorization-openapi.yaml",
+  "exports": {
+    "./openapi": "./api-authorization-openapi.yaml",
+    "./oauth-metadata": "./api-authorization-oauth-metadata.yaml"
+  },
+  "files": [
+    "api-authorization-openapi.yaml",
+    "api-authorization-oauth-metadata.yaml",
+    "fixtures/openapi-clean.yaml",
+    "fixtures/openapi-noncompliant.yaml",
+    "fixtures/oauth-metadata-clean.json",
+    "fixtures/oauth-metadata-noncompliant.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "lint:openapi:clean": "spectral lint fixtures/openapi-clean.yaml -r api-authorization-openapi.yaml -f json",
+    "lint:openapi:bad": "spectral lint fixtures/openapi-noncompliant.yaml -r api-authorization-openapi.yaml -f json",
+    "lint:meta:clean": "spectral lint fixtures/oauth-metadata-clean.json -r api-authorization-oauth-metadata.yaml -f json",
+    "lint:meta:bad": "spectral lint fixtures/oauth-metadata-noncompliant.json -r api-authorization-oauth-metadata.yaml -f json",
+    "test": "node scripts/test-ruleset.mjs"
+  },
+  "devDependencies": {
+    "@stoplight/spectral-cli": "^6.11.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scarfSettings": {
+    "enabled": false
+  }
+}
