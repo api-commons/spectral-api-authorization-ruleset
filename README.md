@@ -79,3 +79,14 @@ RFC 9700 (OAuth 2.0 Security BCP), OAuth 2.1 (`draft-ietf-oauth-v2-1`), FAPI 2.0
 ## License
 
 Apache-2.0 — Copyright 2026 API Commons (Kin Lane).
+
+## Part of API Commons
+
+An open, browser-first tool from **[API Commons](https://apicommons.org)** — free, no backend, your data stays in your browser. Browse the full set at **[apicommons.org/tools](https://apicommons.org/tools/)**.
+
+**Related tools**
+- [Spectral OWASP Ruleset](https://github.com/api-commons/spectral-owasp-ruleset) — the OWASP API Security Top 10 governance layer
+- [Spectral Ruleset Studio](https://studio.apicommons.org) — turn a style guide into an owned, grounded ruleset
+- [Ruleset Commons](https://rulesets.apicommons.org) — adopt a provenanced ruleset by reference
+- [Spectral Reporter](https://reporter.apicommons.org) — Spectral JSON → self-contained HTML governance report
+- [API Validator](https://validator.apicommons.org) — lint OpenAPI/AsyncAPI/Arazzo/JSON Schema in-browser
