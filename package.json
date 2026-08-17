@@ -1,9 +1,9 @@
 {
   "name": "@api-common/spectral-api-authorization-ruleset",
   "version": "0.1.0",
-  "description": "A curated, owned, grounded Spectral ruleset for the API Authorization Profile — lint your OpenAPI and OAuth Authorization Server metadata against OAuth 2.1 / FAPI 2.0 at two tiers (normal/high). An API Commons tool.",
+  "description": "A curated, owned, grounded Spectral ruleset for the API Authorization Profile \u2014 lint your OpenAPI and OAuth Authorization Server metadata against OAuth 2.1 / FAPI 2.0 at two tiers (normal/high). An API Commons tool.",
   "type": "module",
-  "license": "Apache-2.0",
+  "license": "CC-BY-NC-SA-4.0 AND Apache-2.0",
   "author": "API Evangelist (https://apievangelist.com)",
   "homepage": "https://apicommons.org/api-authorization",
   "repository": {
