@@ -1,6 +1,6 @@
 # Spectral API Authorization Ruleset
 
-**A curated, owned, grounded [Stoplight Spectral](https://github.com/stoplightio/spectral) ruleset for the [API Authorization Profile](https://apicommons.org/api-authorization) — lint your API's authorization posture against OAuth 2.1 and FAPI 2.0 at two tiers, in one line.**
+**A curated, owned, grounded [OpenLint](https://openlint.org) ruleset (also runs in [Spectral](https://github.com/stoplightio/spectral)) for the [API Authorization Profile](https://apicommons.org/api-authorization) — lint your API's authorization posture against OAuth 2.1 and FAPI 2.0 at two tiers, in one line.**
 
 `@api-common/spectral-api-authorization-ruleset` turns "we use OAuth" into something you can **check on every commit**. It encodes a two-tier authorization profile — **`normal`** (grounded in [RFC 9700](https://datatracker.ietf.org/doc/html/rfc9700) / OAuth 2.1) and **`high`** ([FAPI 2.0](https://openid.net/specs/fapi-2_0-security-profile.html)) — as Spectral rules that use **built-in functions only** (no custom JavaScript), so it runs anywhere Spectral runs.
 
@@ -19,11 +19,11 @@ An OpenAPI document can't carry the whole story. The FAPI-specific truth — DPo
 
 ```sh
 # lint your OpenAPI
-spectral lint openapi.yaml -r api-authorization-openapi.yaml
+openlint lint openapi.yaml -r api-authorization-openapi.yaml
 
 # lint your authorization server metadata
 curl -s https://as.example.gov/.well-known/openid-configuration -o as-metadata.json
-spectral lint as-metadata.json -r api-authorization-oauth-metadata.yaml
+openlint lint as-metadata.json -r api-authorization-oauth-metadata.yaml
 ```
 
 Adopt by reference from [ruleset-commons](https://rulesets.apicommons.org) or npm and inherit updates instead of forking a frozen copy.

@@ -7,7 +7,7 @@
 //   2. the clean fixture is completely silent (no error AND no warn)
 //   3. no rule throws while linting either document
 //
-// No test framework — spawn Spectral, parse JSON, assert, exit non-zero on
+// No test framework — spawn OpenLint, parse JSON, assert, exit non-zero on
 // failure so `npm test` / CI gate on it.
 
 import { spawnSync } from 'node:child_process';
@@ -23,7 +23,7 @@ let failures = 0;
 function lint(fixture, ruleset) {
   const file = resolve(root, 'fixtures', fixture);
   const rules = resolve(root, ruleset);
-  const bin = resolve(root, 'node_modules', '.bin', 'spectral');
+  const bin = resolve(root, 'node_modules', '.bin', 'openlint');
   const outFile = resolve(tmpdir(), `authz-spectral-${fixture.replace(/\W/g, '_')}-${process.pid}.json`);
   const res = spawnSync(
     bin,
@@ -40,7 +40,7 @@ function lint(fixture, ruleset) {
   try {
     json = JSON.parse(readFileSync(outFile, 'utf8').trim() || '[]');
   } catch (e) {
-    console.error(`Failed to parse Spectral JSON output for ${fixture}.`);
+    console.error(`Failed to parse OpenLint JSON output for ${fixture}.`);
     console.error('stdout:', res.stdout);
     console.error('stderr:', res.stderr);
     process.exit(2);
